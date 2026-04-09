@@ -1,232 +1,343 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYFSS | Official System</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #58a6ff; --bg-dark: #0d1117; --card-bg: #161b22; --border: #30363d; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-dark); color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .grid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; opacity: 0.15; }
-        
-        #welcome-screen { position: fixed; width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at center, #161b22 0%, #0d1117 100%); z-index: 100; transition: 0.8s; text-align: center; }
-        .logo-fss { width: 130px; margin-bottom: 20px; filter: drop-shadow(0 0 20px var(--primary)); }
-        .btn-enter { padding: 15px 50px; background: transparent; border: 1px solid var(--primary); color: var(--primary); font-family: 'JetBrains Mono'; font-weight: bold; cursor: pointer; transition: 0.3s; letter-spacing: 2px; text-transform: uppercase; margin-top: 40px; }
-        .btn-enter:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIKIHOUSE FSS - Ensiklopedia Negara Fiksi</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: sans-serif; margin: 0; display: flex; background-color: #f6f6f6; color: #202122; }
 
-        #main-dashboard { display: none; max-width: 500px; margin: 30px auto; padding: 20px; opacity: 0; transition: 1s; }
-        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        
-        /* Menu Grid 3 Kolom agar muat */
-        .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .menu-item { background: var(--card-bg); border: 1px solid var(--border); padding: 15px 5px; border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .menu-item:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .menu-item svg { width: 24px; height: 24px; fill: var(--primary); margin-bottom: 8px; }
-        .menu-item span { font-size: 0.6rem; font-weight: bold; display: block; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .page-section { display: none; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } }
-        
-        .back-btn { color: var(--primary); cursor: pointer; margin-bottom: 15px; display: inline-block; font-weight: bold; font-size: 0.8rem; }
-        .item-row { background: #0d1117; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; border: 1px solid #30363d; display: flex; align-items: center; justify-content: space-between; }
-        .btn-view { background: var(--primary); color: black; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 0.7rem; font-weight: bold; }
-        
-        /* Polling Style */
-        .poll-box { background: #0d1117; padding: 15px; border-radius: 10px; border: 1px solid var(--primary); margin-bottom: 15px; }
-        .poll-option { display: flex; justify-content: space-between; align-items: center; background: #1c2128; padding: 10px; margin-top: 8px; border-radius: 6px; cursor: pointer; border: 1px solid #30363d; transition: 0.2s; }
-        .poll-option:hover { border-color: var(--primary); background: #21262d; }
-        .vote-count { background: var(--primary); color: black; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
+        /* Sidebar Khas Wiki */
+        .sidebar {
+            width: 230px; padding: 20px 15px; background: #f6f6f6;
+            height: 100vh; position: sticky; top: 0;
+            border-right: 1px solid #a7d7f9; overflow-y: auto;
+        }
+        .wiki-logo { display: block; margin: 0 auto 10px auto; width: 100px; height: auto; border-radius: 50%; }
+        .logo-text { font-family: serif; font-size: 1.1em; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar li { margin-bottom: 12px; font-size: 0.85em; border-bottom: 1px solid #eef0f2; padding-bottom: 5px; }
+        .sidebar b { display: block; margin-top: 15px; margin-bottom: 5px; color: #54595d; text-transform: uppercase; font-size: 0.75em; }
+        .sidebar a { text-decoration: none; color: #0645ad; cursor: pointer; }
+        .sidebar a:hover { text-decoration: underline; }
 
-        /* Organisasi Style */
-        .org-list { list-style: none; margin-top: 15px; }
-        .org-list li { background: #0d1117; border: 1px solid #30363d; padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 0.8rem; line-height: 1.4; }
-        .org-leader { border-color: var(--primary) !important; background: radial-gradient(circle at center, #1c2128 0%, #0d1117 100%); }
+        /* Action Buttons Style */
+        .action-links { font-size: 0.75em; margin-top: 4px; display: flex; gap: 8px; }
+        .edit-btn { color: #198754; cursor: pointer; }
+        .del-btn { color: #dc3545; cursor: pointer; }
 
-        input { width: 100%; background: #0d1117; border: 1px solid var(--border); color: white; padding: 12px; margin-top: 10px; border-radius: 8px; }
-        .fade-out { opacity: 0; transform: scale(0.95); pointer-events: none; }
-    </style>
+        /* Main Content */
+        .main-container { flex: 1; background: white; padding: 20px 40px; min-height: 100vh; border-left: 1px solid #a7d7f9; }
+        
+        .welcome-banner {
+            background-color: #f8f9fa; border: 1px solid #a2a9b1;
+            padding: 20px; margin-bottom: 25px; text-align: center;
+        }
+
+        /* Fitur Gambar Baru Ahmad */
+        .feature-image-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #eaecf0;
+        }
+        .feature-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .feature-caption {
+            margin-top: 10px;
+            font-style: italic;
+            color: #444;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .pencetus-section {
+            display: flex; gap: 20px; background: #fffaf0;
+            border: 1px solid #e6dbba; padding: 20px; margin-top: 30px;
+            align-items: flex-start; border-radius: 4px;
+        }
+        .pencetus-img { width: 150px; height: auto; border: 1px solid #a2a9b1; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        .pencetus-text { flex: 1; font-size: 0.95em; line-height: 1.6; }
+        .pencetus-text h3 { margin: 0 0 10px 0; color: #b32424; font-family: serif; font-size: 1.5em; border-bottom: 1px solid #e6dbba; }
+
+        /* Form Styling */
+        .form-container { background: #f8f9fa; border: 1px solid #a2a9b1; padding: 20px; border-radius: 4px; }
+        .form-section-title { background: #eaecf0; padding: 8px 12px; margin: 20px 0 15px 0; font-weight: bold; border-left: 5px solid #3366cc; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.9em; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #a2a9b1; border-radius: 2px; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .etnis-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        
+        .image-upload-box { border: 1px dashed #a2a9b1; padding: 10px; margin-bottom: 10px; background: #fff; }
+        
+        .captcha-container { margin: 20px 0; display: flex; justify-content: center; }
+
+        .btn-submit { background: #3366cc; color: white; border: none; padding: 15px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1.1em; margin-top: 10px; transition: 0.2s; }
+        .btn-submit:hover { background: #2a52a4; }
+
+        .hidden { display: none; }
+        h1 { font-family: serif; border-bottom: 1px solid #a2a9b1; padding-bottom: 5px; font-weight: normal; }
+        h2 { font-family: serif; border-bottom: 1px solid #a2a9b1; color: #333; margin-top: 40px; font-weight: normal; }
+    </style>
 </head>
-<body onload="loadData()">
-    <div class="grid-bg"></div>
+<body>
 
-    <section id="welcome-screen">
-        <img src="https://image2url.com/r2/default/images/1773059223816-ab431f08-6398-40d1-b645-1ab7b87da75b.png" class="logo-fss">
-        <h1 style="font-family: 'JetBrains Mono'; letter-spacing: 5px; font-size: 2.5rem;">MyFSS</h1>
-        <p style="color:var(--primary); margin-top: 10px; font-weight: 300; letter-spacing: 1px;">Website Resmi Fiction State Society</p>
-        <button class="btn-enter" onclick="showMain()">MEMASUKI SISTEM</button>
-    </section>
+    <nav class="sidebar">
+        <img src="https://image2url.com/r2/default/images/1775553545424-7f6f2222-ab14-4a4f-80ab-e0f806953268.jpeg" alt="Logo" class="wiki-logo">
+        <div class="logo-text">WIKIHOUSE FSS</div>
+        <ul>
+            <li><a onclick="showPage('home')">🏠 Halaman Utama</a></li>
+            <b>Kontribusi</b>
+            <li><a onclick="showPage('tambah')">➕ Tambah Halaman Baru</a></li>
+            <b>Navigasi Arsip</b>
+            <div id="dynamic-menu">
+                </div>
+        </ul>
+    </nav>
 
-    <main id="main-dashboard">
-        <div id="home-view">
-            <div class="card">
-                <h2 style="text-align: center; font-family: 'JetBrains Mono'; font-size: 1.2rem; color: var(--primary);">Selamat Datang di MyFSS</h2>
-                <p style="text-align: center; font-size: 0.8rem; margin-top: 5px; opacity: 0.8;">Panel kendali otoritas FSS siap digunakan.</p>
-            </div>
-            
-            <div class="card"><img src="https://image2url.com/r2/default/images/1773060190605-99667ee5-87a3-4d0c-8d1e-74e7a34bbfc7.jpeg" style="width:100%; border-radius:8px;"></div>
-            
-            <div class="menu-grid">
-                <div class="menu-item" onclick="openPage('doc-page')"><svg viewBox="0 0 24 24"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/></svg><span>DOKUMEN</span></div>
-                <div class="menu-item" onclick="openPage('poll-page')"><svg viewBox="0 0 24 24"><path d="M12,15L7,10H10V3H14V10H17L12,15M17,17H15V19H9V17H7V19A2,2 0 0,0 9,21H15A2,2 0 0,0 17,19V17Z"/></svg><span>VOTING</span></div>
-                <div class="menu-item" onclick="openPage('event-page')"><svg viewBox="0 0 24 24"><path d="M19,19H5V8H19M16,1V3H8V1H6V3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3H18V1M17,12H12V17H17V12Z"/></svg><span>ACARA</span></div>
-                <div class="menu-item" onclick="openPage('rules-page')"><svg viewBox="0 0 24 24"><path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z"/></svg><span>ATURAN</span></div>
-                
-                <div class="menu-item" onclick="openPage('org-page')"><svg viewBox="0 0 24 24"><path d="M12.5,10.16C10.89,8.71 8.78,8 6.5,8C6.16,8 5.83,8.03 5.5,8.07V5.5C5.5,4.12 6.62,3 8,3C9.38,3 10.5,4.12 10.5,5.5V10.16M18.5,8.07C18.17,8.03 17.84,8 17.5,8C15.22,8 13.11,8.71 11.5,10.16V5.5C11.5,4.12 12.62,3 14,3C15.38,3 16.5,4.12 16.5,5.5V8.07M22,12V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V12A2,2 0 0,1 4,10H10V11H14V10H20A2,2 0 0,1 22,12M14,14V16H10V14H14Z"/></svg><span>ORGANISASI</span></div>
-                
-                <div class="menu-item" onclick="openPage('about-page')"><svg viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"/></svg><span>TENTANG</span></div>
-            </div>
-        </div>
+    <main class="main-container">
+        
+        <div id="page-home">
+            <div class="welcome-banner">
+                <img src="https://image2url.com/r2/default/images/1775553545424-7f6f2222-ab14-4a4f-80ab-e0f806953268.jpeg" alt="Logo" style="width: 60px; margin-bottom: 10px;">
+                <h2>Selamat datang di WIKI HOUSE FSS</h2>
+                <p>Tempat ensiklopedia Negara Fiksi Maupun Organisasi Negara Fiksi</p>
+            </div>
 
-        <div id="org-page" class="page-section">
-            <span class="back-btn" onclick="goHome()">← KEMBALI</span>
-            <div class="card" style="text-align:center;">
-                <img src="https://image2url.com/r2/default/images/1773135560340-f1bb2ef6-619c-44eb-b842-1bb5279243ef.jpeg" style="width:100px; border-radius:50%; border:2px solid var(--primary); padding:5px; margin-bottom:15px;">
-                <h3 style="color:var(--primary); font-family: 'JetBrains Mono';">MEDITERRANEAN UNION</h3>
-                <p style="font-size:0.75rem; opacity:0.7; margin-top:5px;">Daftar Peserta & Struktur Organisasi</p>
-                
-                <ul class="org-list" style="text-align:left;">
-                    <li class="org-leader"><b>1. Emperor Hunai Daian</b><br><small>Empire Of Levant (Ketua Organisasi)</small></li>
-                    <li><b>2. Emperor Louis Alexander The Great</b><br><small>Brençais Empire</small></li>
-                    <li><b>3. President Christian Wuff</b><br><small>Federasi Germany</small></li>
-                    <li><b>4. President Haidar Mubarak</b><br><small>Jumhuriyat Misr Al-Arabiyyah</small></li>
-                </ul>
-            </div>
-        </div>
+            <div class="feature-image-container">
+                <img src="https://image2url.com/r2/default/images/1775747473382-094d77d5-7c9c-458e-a448-782c642b02f3.png" alt="Mr. Ahmad FSS" class="feature-img">
+                <div class="feature-caption">Mr.Ahmad Mewujudkan WikiHouse FSS untuk semuanya</div>
+            </div>
+            
+            <header><h1>Biografi Pencetus: Mr. Ahmad</h1></header>
 
-        <div id="rules-page" class="page-section">
-            <span class="back-btn" onclick="goHome()">← KEMBALI</span>
-            <div class="card">
-                <h3>PERATURAN ROLEPLAY FSS</h3>
-                <p style="font-size:0.8rem; line-height:1.6; margin-top:10px;">
-                    <b>RP secara umum:</b><br>
-                    - Roleplay sesuai negara referensi irl masing-masing, boleh menggabungkan 1-2 referensi negara.<br>
-                    - Roleplay dengan logis.<br>
-                    - Dilarang rasis ketika RP.<br>
-                    - Hanya boleh mengklaim 1 wilayah kecuali menaklukan wilayah lain.<br>
-                    - Boleh menggunakan sejarah alternatif.<br><br>
-                    <b>Peraturan RP Perang:</b><br>
-                    - Jangan spam RP perang, tunggu balasan lawan.<br>
-                    - Ke-2 pihak harus online ketika war terjadi.<br>
-                    - Peraturan perang mengikuti konvensi Jenewa.<br>
-                    - Dilarang keras penggunaan nuklir tanpa izin admin.<br><br>
-                    <b>RP Diplomasi:</b><br>
-                    - Wajib mengirim proposal kepada negara tujuan.<br>
-                    - Ke-2 pihak setuju membangun kedutaan bersama.
-                </p>
-            </div>
-        </div>
-        
-        <div id="doc-page" class="page-section">
-            <span class="back-btn" onclick="goHome()">← KEMBALI</span>
-            <div class="card">
-                <h3>PUSAT DOKUMEN</h3>
-                <input type="file" id="docFile" style="font-size: 0.7rem; color: #888;">
-                <input type="text" id="docT" placeholder="Nama Dokumen">
-                <button class="btn-enter" style="width:100%; margin-top:10px; font-size:0.7rem;" onclick="addDoc()">UPLOAD SEKARANG</button>
-                <div id="docList" style="margin-top:20px;"></div>
-            </div>
-        </div>
-        
-        <div id="poll-page" class="page-section">
-            <span class="back-btn" onclick="goHome()">← KEMBALI</span>
-            <div id="activePolls"></div>
-            <div class="card">
-                <h3>BUAT VOTING BARU</h3>
-                <input type="text" id="q" placeholder="Pertanyaan Voting">
-                <input type="text" id="o1" placeholder="Opsi A">
-                <input type="text" id="o2" placeholder="Opsi B">
-                <button class="btn-enter" style="width:100%; margin-top:10px; font-size:0.7rem;" onclick="addPoll()">TERBITKAN POLLING</button>
-            </div>
-        </div>
-        
-        <div id="event-page" class="page-section"><span class="back-btn" onclick="goHome()">← KEMBALI</span><div class="card"><h3>JADWAL ACARA</h3><input type="text" id="evN" placeholder="Nama Event"><input type="text" id="evD" placeholder="Tanggal"><button class="btn-enter" style="width:100%; margin-top:10px; font-size:0.7rem;" onclick="addEvent()">BUAT ACARA</button><div id="evList" style="margin-top:10px;"></div></div></div>
-        <div id="about-page" class="page-section"><span class="back-btn" onclick="goHome()">← KEMBALI</span><div class="card" style="text-align:center;"><img src="https://image2url.com/r2/default/images/1773059223816-ab431f08-6398-40d1-b645-1ab7b87da75b.png" style="width:80px;"><h2 style="color:var(--primary); margin:10px 0;">TENTANG KAMI</h2><p style="font-size:0.85rem; text-align:justify; line-height:1.6;"><b>FSS (Fictional State Society)</b> didirikan pada 11 Februari 2026 sebagai wadah roleplay negara fiksi yang imersif dan strategis.</p></div></div>
-    </main>
+            <div class="pencetus-section">
+                <img src="https://image2url.com/r2/default/images/1775553846248-c0f14b28-bee7-45ff-bcb8-d620e718511e.jpeg" alt="Mr. Ahmad" class="pencetus-img">
+                <div class="pencetus-text">
+                    <h3>Mr. Ahmad</h3>
+                    <p><b>Mr. Ahmad</b> merupakan sosok visioner yang menjadi pencetus utama berdirinya <b>FSS</b> serta platform <b>WIKIHOUSE FSS</b>. Perjalanan beliau di dunia negara fiksi dimulai pada tahun 2021, di mana beliau aktif membangun komunitas dan berkontribusi pada berbagai organisasi negara fiksi di skala nasional.</p>
+                    <p>Beliau merupakan pendiri dari <b>Republik Neriasia</b>. Pada tahun 2022, Mr. Ahmad melakukan terobosan dengan mendirikan <b>G20-NF</b>, organisasi negara fiksi pertama di Indonesia yang menggunakan WhatsApp sebagai basis operasional utamanya. Inovasi ini muncul di tengah tren komunitas yang saat itu masih didominasi oleh platform TikTok dan Discord.</p>
+                    <p>Kehadiran G20-NF melambungkan nama Mr. Ahmad sebagai tokoh berpengaruh di mata para penikmat negara fiksi. Memasuki tahun 2026, sebagai langkah regenerasi dan transformasi visi yang lebih luas, <b>FSS</b> resmi didirikan untuk menggantikan peran G20-NF dalam menaungi komunitas fiksi tanah air.</p>
+                </div>
+            </div>
 
-    <script>
-        function showMain() { document.getElementById('welcome-screen').classList.add('fade-out'); setTimeout(() => { document.getElementById('welcome-screen').style.display = 'none'; document.getElementById('main-dashboard').style.display = 'block'; setTimeout(() => document.getElementById('main-dashboard').style.opacity = '1', 50); }, 800); }
-        function openPage(id) { document.getElementById('home-view').style.display = 'none'; document.querySelectorAll('.page-section').forEach(p => p.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
-        function goHome() { document.querySelectorAll('.page-section').forEach(p => p.style.display = 'none'); document.getElementById('home-view').style.display = 'block'; }
-        
-        function addDoc() {
-            let name = document.getElementById('docT').value;
-            let fileInput = document.getElementById('docFile');
-            if(name && fileInput.files.length > 0) {
-                let file = fileInput.files[0];
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    let d = JSON.parse(localStorage.getItem('fss_docs') || '[]');
-                    d.push({name: name, url: e.target.result});
-                    localStorage.setItem('fss_docs', JSON.stringify(d));
-                    renderDocs();
-                    document.getElementById('docT').value = "";
-                    fileInput.value = "";
-                };
-                reader.readAsDataURL(file);
-            } else { alert("Isi nama dan pilih file!"); }
-        }
-        function renderDocs() {
-            let d = JSON.parse(localStorage.getItem('fss_docs') || '[]');
-            document.getElementById('docList').innerHTML = d.map(i => `<div class='item-row'><span>📄 ${i.name}</span><a href="${i.url}" download="${i.name}" class="btn-view">BUKA</a></div>`).join('');
-        }
+            <h2>Eksplorasi Dunia Fiksi</h2>
+            <p>Jelajahi berbagai dokumentasi negara dan organisasi yang telah terdaftar, atau buatlah sejarah baru melalui menu kontribusi di samping kiri.</p>
+        </div>
 
-        function addPoll() {
-            let q = document.getElementById('q').value;
-            let o1 = document.getElementById('o1').value;
-            let o2 = document.getElementById('o2').value;
-            if(q && o1 && o2) {
-                let p = JSON.parse(localStorage.getItem('fss_polls') || '[]');
-                p.push({ q, o1, o2, v1: 0, v2: 0 }); 
-                localStorage.setItem('fss_polls', JSON.stringify(p));
-                renderPolls();
-                document.getElementById('q').value = "";
-                document.getElementById('o1').value = "";
-                document.getElementById('o2').value = "";
-            }
-        }
+        <div id="page-tambah" class="hidden">
+            <h1>Buat Entri Negara/Organisasi Baru</h1>
+            <div class="form-container">
+                
+                <div class="form-section-title">Informasi Dasar</div>
+                <div class="form-group">
+                    <label>Nama Entri (Negara/Organisasi)</label>
+                    <input type="text" id="input-name" placeholder="Contoh: Republik Neriasia">
+                </div>
 
-        function vote(index, opt) {
-            let p = JSON.parse(localStorage.getItem('fss_polls'));
-            if(opt === 1) p[index].v1++;
-            else p[index].v2++;
-            localStorage.setItem('fss_polls', JSON.stringify(p));
-            renderPolls();
-        }
+                <div class="form-group">
+                    <label>Semboyan Negara</label>
+                    <input type="text" id="input-motto" placeholder="Contoh: Bhinneka Tunggal Ika">
+                </div>
 
-        function renderPolls() {
-            let p = JSON.parse(localStorage.getItem('fss_polls') || '[]');
-            document.getElementById('activePolls').innerHTML = p.map((i, index) => `
-                <div class='poll-box'>
-                    <h4 style="margin-bottom:10px; font-size:0.9rem;">${i.q}</h4>
-                    <div class="poll-option" onclick="vote(${index}, 1)">
-                        <span>${i.o1}</span>
-                        <span class="vote-count">${i.v1} Suara</span>
-                    </div>
-                    <div class="poll-option" onclick="vote(${index}, 2)">
-                        <span>${i.o2}</span>
-                        <span class="vote-count">${i.v2} Suara</span>
-                    </div>
-                </div>
-            `).join('');
-        }
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Judul Lagu Kebangsaan</label>
+                        <input type="text" id="input-anthem-title" placeholder="Nama lagu kebangsaan">
+                    </div>
+                    <div class="form-group">
+                        <label>Unggah Lagu Kebangsaan (Audio)</label>
+                        <input type="file" id="input-anthem-file" accept="audio/*">
+                    </div>
+                </div>
 
-        function addEvent() {
-            let n = document.getElementById('evN').value, d = document.getElementById('evD').value;
-            if(n) {
-                let e = JSON.parse(localStorage.getItem('fss_evs') || '[]');
-                e.push({n, d});
-                localStorage.setItem('fss_evs', JSON.stringify(e));
-                renderEvents();
-            }
-        }
-        function renderEvents() {
-            let e = JSON.parse(localStorage.getItem('fss_evs') || '[]');
-            document.getElementById('evList').innerHTML = e.map(i => `<div class='item-row'><b>${i.n}</b><span>${i.d}</span></div>`).join('');
-        }
-        
-        function loadData() { renderDocs(); renderPolls(); renderEvents(); }
-    </script>
+                <div class="form-section-title">Identitas Visual Utama</div>
+                <div class="image-upload-box">
+                    <div class="form-group">
+                        <label>Judul Gambar Utama (Misal: Bendera/Lambang)</label>
+                        <input type="text" id="main-image-title" placeholder="Contoh: Bendera Nasional">
+                    </div>
+                    <div class="form-group">
+                        <label>Pilih Gambar Utama</label>
+                        <input type="file" id="input-image" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="form-section-title">Data Teknis & Geografis</div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Luas Wilayah (km²)</label>
+                        <input type="text" id="input-area" placeholder="Contoh: 1.905.000">
+                    </div>
+                    <div class="form-group">
+                        <label>Mata Uang</label>
+                        <input type="text" id="input-currency" placeholder="Contoh: Rupiah (IDR)">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Lajur Kemudi</label>
+                        <select id="input-drive-side">
+                            <option value="Kiri">Kiri</option>
+                            <option value="Kanan">Kanan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Kode Telepon</label>
+                        <input type="text" id="input-phone-code" placeholder="Contoh: +62">
+                    </div>
+                </div>
+
+                <div class="form-section-title">Kelompok Etnis (Top 5)</div>
+                <div class="etnis-grid">
+                    <input type="text" id="etnis-1" placeholder="Etnis 1">
+                    <input type="text" id="etnis-2" placeholder="Etnis 2">
+                    <input type="text" id="etnis-3" placeholder="Etnis 3">
+                    <input type="text" id="etnis-4" placeholder="Etnis 4">
+                    <input type="text" id="etnis-5" placeholder="Etnis 5">
+                </div>
+
+                <div class="form-section-title">Deskripsi Naratif</div>
+                <div class="form-group">
+                    <label>Sejarah & Deskripsi Lengkap</label>
+                    <textarea id="input-desc" rows="8" placeholder="Tuliskan sejarah berdirinya, letak geografis, atau tujuan organisasi secara mendalam..."></textarea>
+                </div>
+
+                <div class="form-section-title">Gambar Pendukung (Maksimal 3)</div>
+                <div class="grid-2">
+                    <div class="image-upload-box">
+                        <label>Judul Gambar 1</label>
+                        <input type="text" id="sub-title-1" placeholder="Judul Gambar 1" style="margin-bottom:5px">
+                        <input type="file" id="sub-img-1" accept="image/*">
+                    </div>
+                    <div class="image-upload-box">
+                        <label>Judul Gambar 2</label>
+                        <input type="text" id="sub-title-2" placeholder="Judul Gambar 2" style="margin-bottom:5px">
+                        <input type="file" id="sub-img-2" accept="image/*">
+                    </div>
+                    <div class="image-upload-box" style="grid-column: span 2;">
+                        <label>Judul Gambar 3</label>
+                        <input type="text" id="sub-title-3" placeholder="Judul Gambar 3" style="margin-bottom:5px">
+                        <input type="file" id="sub-img-3" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="captcha-container">
+                    <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+                </div>
+
+                <button class="btn-submit" onclick="saveData()">🚀 Publikasikan ke WIKIHOUSE FSS</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const SECRET_CODE = "FSS2026";
+
+        window.onload = function() {
+            loadEntries();
+        };
+
+        function showPage(page) {
+            document.getElementById('page-home').classList.add('hidden');
+            document.getElementById('page-tambah').classList.add('hidden');
+            if(page === 'home') document.getElementById('page-home').classList.remove('hidden');
+            if(page === 'tambah') document.getElementById('page-tambah').classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function saveData() {
+            const response = grecaptcha.getResponse();
+            if(response.length == 0) { 
+                alert("Mohon verifikasi reCAPTCHA!"); 
+                return; 
+            }
+
+            const userCode = prompt("Masukkan Kode Otoritas FSS untuk mempublikasikan artikel:");
+            if (userCode !== SECRET_CODE) {
+                alert("KODE SALAH! Otoritas ditolak.");
+                return;
+            }
+
+            const name = document.getElementById('input-name').value;
+            if(!name) { 
+                alert("Mohon isi Nama Negara/Organisasi!"); 
+                return; 
+            }
+            
+            let entries = JSON.parse(localStorage.getItem('fss_wiki_data') || '[]');
+            
+            const existingIndex = entries.findIndex(e => e.name === name);
+            if(existingIndex > -1) {
+                entries[existingIndex] = { name: name, date: new Date().toLocaleDateString() };
+            } else {
+                entries.push({ name: name, date: new Date().toLocaleDateString() });
+            }
+            
+            localStorage.setItem('fss_wiki_data', JSON.stringify(entries));
+
+            alert("Selamat! Entri '" + name + "' telah berhasil dikunci dan dipublikasikan.");
+            
+            grecaptcha.reset();
+            loadEntries(); 
+            showPage('home');
+        }
+
+        function loadEntries() {
+            const menu = document.getElementById('dynamic-menu');
+            menu.innerHTML = '<li><a onclick="showPage(\'home\')">Beranda Utama</a></li>';
+            
+            const entries = JSON.parse(localStorage.getItem('fss_wiki_data') || '[]');
+            
+            entries.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div style="display:flex; flex-direction:column;">
+                        <a onclick="alert('Membuka dokumentasi ${entry.name}')">📄 ${entry.name}</a>
+                        <div class="action-links">
+                            <span class="edit-btn" onclick="editEntry('${entry.name}')">[Sunting]</span>
+                            <span class="del-btn" onclick="deleteEntry(${index})">[Hapus]</span>
+                        </div>
+                    </div>
+                `;
+                menu.appendChild(li);
+            });
+        }
+
+        function editEntry(name) {
+            const userCode = prompt("Masukkan Kode Otoritas FSS untuk menyunting '" + name + "':");
+            if (userCode === SECRET_CODE) {
+                showPage('tambah');
+                document.getElementById('input-name').value = name;
+                alert("Mode Sunting Aktif. Silakan lengkapi data dan publikasikan kembali.");
+            } else {
+                alert("Akses Ditolak!");
+            }
+        }
+
+        function deleteEntry(index) {
+            const userCode = prompt("PERINGATAN: Memasukkan kode akan menghapus artikel. Masukkan Kode Otoritas:");
+            if (userCode === SECRET_CODE) {
+                let entries = JSON.parse(localStorage.getItem('fss_wiki_data') || '[]');
+                entries.splice(index, 1);
+                localStorage.setItem('fss_wiki_data', JSON.stringify(entries));
+                loadEntries();
+                alert("Artikel berhasil dihapus.");
+            } else {
+                alert("Kode Salah! Penghapusan dibatalkan.");
+            }
+        }
+    </script>
 </body>
-</html> 
+</html>
