@@ -3991,21 +3991,14 @@
     <div class="success-desc">
       Negara <strong id="successNegara">—</strong> telah mendaftarkan wilayah 
       <strong id="successWilayah">—</strong>.<br>
-      <span style="font-size:13px;color:#3a6080;">Klik kedua tombol di bawah untuk mengirim konfirmasi ke mapper.</span>
+      <span style="font-size:13px;color:#3a6080;">Klik tombol di bawah untuk mengirim konfirmasi ke grup mapper.</span>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
-      <button class="wa-btn" id="btnMapper1" onclick="kirimKeMapper(0)">
-        <i class="ti ti-brand-whatsapp"></i>
-        <span>Kirim ke Mapper 1 &nbsp;<small style="opacity:0.8;font-size:12px;">+62 853-9428-1718</small></span>
-      </button>
-      <button class="wa-btn" id="btnMapper2" onclick="kirimKeMapper(1)">
-        <i class="ti ti-brand-whatsapp"></i>
-        <span>Kirim ke Mapper 2 &nbsp;<small style="opacity:0.8;font-size:12px;">+62 812-6570-7087</small></span>
-      </button>
-    </div>
-
-    <div id="sendStatus" style="font-size:12px;color:#3a6080;text-align:center;margin-bottom:8px;min-height:18px;font-style:italic;"></div>
+    <button class="wa-btn" onclick="kirimWA()">
+      <i class="ti ti-brand-whatsapp"></i>
+      Buka Grup &amp; Salin Pesan
+    </button>
+    <div id="copyStatus" style="font-size:12px;text-align:center;margin:6px 0;min-height:18px;font-style:italic;color:#3a6080;"></div>
     <button class="success-close" onclick="tutupModal()">Tutup</button>
   </div>
 </div>
@@ -4159,30 +4152,17 @@
     flagBase64 = '';
   }
 
-  function buatPesan() {
+  function kirimWA() {
     const num = document.getElementById('successWilayah').textContent;
-    return `🌍 *Pendaftaran Fiction State Society*\n\n*Nama Negara:* ${dataNegara}\n*Wilayah Diklaim:* ${num}\n*Nomor WA:* ${dataWA}\n\nMohon segera diproses. Terima kasih!`;
-  }
-
-  function kirimKeMapper(index) {
-    const nomor = MAPPER_NUMBERS[index];
-    const pesan = buatPesan();
-    const url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
-    window.open(url, '_blank');
-    // Visual feedback
-    const btn = document.getElementById('btnMapper' + (index + 1));
-    btn.style.background = 'linear-gradient(135deg, #1a7a3c, #0f5228)';
-    btn.innerHTML = '<i class="ti ti-check"></i> <span>Terkirim!</span>';
-    const labels = ['Mapper 1', 'Mapper 2'];
-    const status = document.getElementById('sendStatus');
-    const sent = document.querySelectorAll('#btnMapper1[style*="Terkirim"], #btnMapper2[style*="Terkirim"]').length;
-    if (document.getElementById('btnMapper1').innerHTML.includes('Terkirim') && 
-        document.getElementById('btnMapper2').innerHTML.includes('Terkirim')) {
-      status.textContent = '✅ Semua mapper sudah dikirim!';
-      status.style.color = '#1a7a3c';
-    } else {
-      status.textContent = '✔ ' + labels[index] + ' sudah dikirim. Klik tombol lainnya juga.';
+    const pesan = `🌍 *Pendaftaran Fiction State Society*\n\n*Nama Negara:* ${dataNegara}\n*Wilayah Diklaim:* ${num}\n*Nomor WA:* ${dataWA}\n\nMohon segera diproses. Terima kasih!`;
+    // Copy pesan ke clipboard lalu buka grup
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pesan).then(() => {
+        document.getElementById('copyStatus').textContent = '✅ Pesan berhasil disalin! Tinggal paste di grup.';
+        document.getElementById('copyStatus').style.color = '#1a7a3c';
+      }).catch(() => {});
     }
+    window.open('https://chat.whatsapp.com/BDwH98nCg4BAZz8qEjtgC5', '_blank');
   }
 </script>
 
