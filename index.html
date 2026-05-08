@@ -3990,13 +3990,22 @@
     <img id="successFlag" class="success-flag" src="" alt="" style="display:none">
     <div class="success-desc">
       Negara <strong id="successNegara">—</strong> telah mendaftarkan wilayah 
-      <strong id="successWilayah">—</strong>. 
-      Kirim data ke mapper untuk konfirmasi resmi.
+      <strong id="successWilayah">—</strong>.<br>
+      <span style="font-size:13px;color:#3a6080;">Klik kedua tombol di bawah untuk mengirim konfirmasi ke mapper.</span>
     </div>
-    <button class="wa-btn" onclick="kirimWA()">
-      <i class="ti ti-brand-whatsapp"></i>
-      Kirim Ulang ke 2 Mapper
-    </button>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
+      <button class="wa-btn" id="btnMapper1" onclick="kirimKeMapper(0)">
+        <i class="ti ti-brand-whatsapp"></i>
+        <span>Kirim ke Mapper 1 &nbsp;<small style="opacity:0.8;font-size:12px;">+62 853-9428-1718</small></span>
+      </button>
+      <button class="wa-btn" id="btnMapper2" onclick="kirimKeMapper(1)">
+        <i class="ti ti-brand-whatsapp"></i>
+        <span>Kirim ke Mapper 2 &nbsp;<small style="opacity:0.8;font-size:12px;">+62 812-6570-7087</small></span>
+      </button>
+    </div>
+
+    <div id="sendStatus" style="font-size:12px;color:#3a6080;text-align:center;margin-bottom:8px;min-height:18px;font-style:italic;"></div>
     <button class="success-close" onclick="tutupModal()">Tutup</button>
   </div>
 </div>
@@ -4125,11 +4134,11 @@
     const count = document.querySelectorAll('.territory.claimed').length;
     document.getElementById('claimedCount').textContent = count + ' / 73 diklaim';
 
-    // Auto-send to both mapper numbers immediately
-    const num = 'Wilayah #' + (parseInt(territory.replace('territory-', '')) + 1);
-    kirimWAOtomatis(negara, dataWA, num);
-
     document.getElementById('successOverlay').classList.add('show');
+    // Reset send status
+    document.getElementById('sendStatus').textContent = '';
+    document.getElementById('btnMapper1').style.background = '';
+    document.getElementById('btnMapper2').style.background = '';
 
     // Reset form
     selectedTerritoryId = null;
@@ -4150,21 +4159,30 @@
     flagBase64 = '';
   }
 
-  function kirimWAOtomatis(negara, wa, wilayah) {
-    const pesan = `🌍 *Pendaftaran Fiction State Society*\n\n*Nama Negara:* ${negara}\n*Wilayah Diklaim:* ${wilayah}\n*Nomor WA:* ${wa}\n\nMohon segera diproses. Terima kasih!`;
-    MAPPER_NUMBERS.forEach((nomor, i) => {
-      const url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
-      setTimeout(() => window.open(url, '_blank'), i * 700);
-    });
+  function buatPesan() {
+    const num = document.getElementById('successWilayah').textContent;
+    return `🌍 *Pendaftaran Fiction State Society*\n\n*Nama Negara:* ${dataNegara}\n*Wilayah Diklaim:* ${num}\n*Nomor WA:* ${dataWA}\n\nMohon segera diproses. Terima kasih!`;
   }
 
-  function kirimWA() {
-    const num = document.getElementById('successWilayah').textContent;
-    const pesan = `🌍 *Pendaftaran Fiction State Society*\n\n*Nama Negara:* ${dataNegara}\n*Wilayah Diklaim:* ${num}\n*Nomor WA:* ${dataWA}\n\nMohon segera diproses. Terima kasih!`;
-    MAPPER_NUMBERS.forEach((nomor, i) => {
-      const url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
-      setTimeout(() => window.open(url, '_blank'), i * 700);
-    });
+  function kirimKeMapper(index) {
+    const nomor = MAPPER_NUMBERS[index];
+    const pesan = buatPesan();
+    const url = `https://wa.me/${nomor}?text=${encodeURIComponent(pesan)}`;
+    window.open(url, '_blank');
+    // Visual feedback
+    const btn = document.getElementById('btnMapper' + (index + 1));
+    btn.style.background = 'linear-gradient(135deg, #1a7a3c, #0f5228)';
+    btn.innerHTML = '<i class="ti ti-check"></i> <span>Terkirim!</span>';
+    const labels = ['Mapper 1', 'Mapper 2'];
+    const status = document.getElementById('sendStatus');
+    const sent = document.querySelectorAll('#btnMapper1[style*="Terkirim"], #btnMapper2[style*="Terkirim"]').length;
+    if (document.getElementById('btnMapper1').innerHTML.includes('Terkirim') && 
+        document.getElementById('btnMapper2').innerHTML.includes('Terkirim')) {
+      status.textContent = '✅ Semua mapper sudah dikirim!';
+      status.style.color = '#1a7a3c';
+    } else {
+      status.textContent = '✔ ' + labels[index] + ' sudah dikirim. Klik tombol lainnya juga.';
+    }
   }
 </script>
 
